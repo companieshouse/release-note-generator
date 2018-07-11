@@ -15,7 +15,7 @@ import (
 )
 
 var organisation string = "companieshouse"
-var repo string = getRepoName()
+var repo string = GetRepoName()
 var toolHome string = os.Getenv("GOPATH") + "/src/github.com/release-note-generator"
 
 type PR struct {
@@ -52,6 +52,8 @@ var bugFixes BugFix
 var newFeatures NewFeature
 var prs []PR
 
+// ServeTemplatePre populates the pre release data to the template for the main
+// server to use and server
 func ServeTemplatePre(w http.ResponseWriter, r *http.Request) {
 	if information.Populated == true {
 		t, err := template.ParseFiles("./assets/template.htm")
@@ -63,15 +65,15 @@ func ServeTemplatePre(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createClient()
+	CreateClient()
 
-	stringSlice, err := retrieveMergeCommits()
+	stringSlice, err := RetrieveMergeCommits()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	pulls, err := retrievePRs()
+	pulls, err := RetrievePRs()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -81,49 +83,49 @@ func ServeTemplatePre(w http.ResponseWriter, r *http.Request) {
 		if pull.MergeCommitSHA == nil {
 			continue
 		}
-		commitSHA, err := getMergeCommitSHA(pull)
+		commitSHA, err := GetMergeCommitSHA(pull)
 		if err != nil {
 			fmt.Printf("Error getting merge commit SHA from PR: %s", err)
 			os.Exit(1)
 		}
 
-		if contains(stringSlice, commitSHA) {
-			prNum, err := getPRNum(pull)
+		if Contains(stringSlice, commitSHA) {
+			prNum, err := GetPRNum(pull)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 
-			pr, err := getPR(prNum)
+			pr, err := GetPR(prNum)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 
-			prType, err := getPRType(pr)
+			prType, err := GetPRType(pr)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 
-			name, err := getPRName(pr)
+			name, err := GetPRName(pr)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 
-			url, err := getPRURL(pr)
+			url, err := GetPRURL(pr)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 
 			displayPR := PR{
-				Number: convertPRNumToString(prNum),
+				Number: ConvertPRNumToString(prNum),
 				Name:   name,
 				URL:    url}
 
-			sortPRType(prType, displayPR)
+			SortPRType(prType, displayPR)
 		}
 	}
 
@@ -144,7 +146,9 @@ func ServeTemplatePre(w http.ResponseWriter, r *http.Request) {
 	t.ExecuteTemplate(w, "template.htm", information)
 }
 
-func getRepoName() string {
+// GetRepoName retrieves the repo of the current folder by using git
+// this saves passing the repo as a param to tool or hardcoding repo names
+func GetRepoName() string {
 	getRepoNameCmd := "basename $(git remote get-url origin) .git "
 
 	repoName, err := exec.Command("sh", "-c", getRepoNameCmd).Output()
@@ -162,7 +166,9 @@ func getRepoName() string {
 	return name
 }
 
-func sortPRType(prType string, pr PR) {
+// SortPRType sorts the pull requets into the correct categories
+// depending on whether they are bugs, new features, or improvements
+func SortPRType(prType string, pr PR) {
 	if prType == "bug" {
 		bugFixes.PRs = append(bugFixes.PRs, pr)
 	}
@@ -174,7 +180,10 @@ func sortPRType(prType string, pr PR) {
 	}
 }
 
-func getPRType(pr *github.PullRequest) (string, error) {
+// GetPRType retrieves the PR type(bug fix, improvement, new feature)
+// from the body using a simple contains function. The PRs are
+// then sorted later on.
+func GetPRType(pr *github.PullRequest) (string, error) {
 	prBodyMarshalled, err := json.Marshal(pr.Body)
 	if err != nil {
 		return "", err
@@ -198,7 +207,9 @@ func getPRType(pr *github.PullRequest) (string, error) {
 	return "", nil
 }
 
-func createClient() {
+// CreateClient creates the GitHub client for the accessing of the
+// GitHub APIs
+func CreateClient() {
 	ctx = context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN")},
@@ -208,7 +219,9 @@ func createClient() {
 	client = github.NewClient(tc)
 }
 
-func retrieveMergeCommits() ([]string, error) {
+// RetrieveMergeCommits gets all of the merge SHAs and stores them in a slice
+// which is then returned for further processing
+func RetrieveMergeCommits() ([]string, error) {
 	// retrieves a list of all commits SHAs between the range of the first and second - merges only
 	prCommand := "git rev-list HEAD ^origin/master --merges "
 
@@ -222,7 +235,9 @@ func retrieveMergeCommits() ([]string, error) {
 	return stringSlice, nil
 }
 
-func retrievePRs() ([]*github.PullRequest, error) {
+// RetrievePRs does a full retrieve of all PRs from within the repostory
+// and returns them as an array
+func RetrievePRs() ([]*github.PullRequest, error) {
 	options := &github.PullRequestListOptions{
 		State: "all",
 	}
@@ -236,7 +251,9 @@ func retrievePRs() ([]*github.PullRequest, error) {
 	return pulls, nil
 }
 
-func getMergeCommitSHA(pr *github.PullRequest) (string, error) {
+// GetMergeCommitSHA retrieves the merge commit SHA from the passed
+// in pull request
+func GetMergeCommitSHA(pr *github.PullRequest) (string, error) {
 	commitSHAMarshalled, err := json.Marshal(pr.MergeCommitSHA)
 	if err != nil {
 		return "", err
@@ -251,7 +268,9 @@ func getMergeCommitSHA(pr *github.PullRequest) (string, error) {
 	return commitSHA, nil
 }
 
-func getPR(number int) (*github.PullRequest, error) {
+// GetPR gets the specific PR object from the repository using GitHub API
+// and returns the PR for further processing
+func GetPR(number int) (*github.PullRequest, error) {
 	pr, _, err := client.PullRequests.Get(ctx, organisation, repo, number)
 	if err != nil {
 		return nil, err
@@ -260,7 +279,9 @@ func getPR(number int) (*github.PullRequest, error) {
 	return pr, nil
 }
 
-func getPRURL(pr *github.PullRequest) (string, error) {
+// GetPRURL returns the URL of the PR for the linking of the PR
+// within the web-page
+func GetPRURL(pr *github.PullRequest) (string, error) {
 	prUrlMarshalled, err := json.Marshal(pr.HTMLURL)
 	if err != nil {
 		return "", err
@@ -274,7 +295,9 @@ func getPRURL(pr *github.PullRequest) (string, error) {
 	return url, nil
 }
 
-func getPRNum(pr *github.PullRequest) (int, error) {
+// GetPRNum retrieves the pull request number from the PR object returned
+// from GitHub API and returns it as an int
+func GetPRNum(pr *github.PullRequest) (int, error) {
 	prNum, err := json.Marshal(pr.Number)
 	if err != nil {
 		return 1, err
@@ -287,7 +310,9 @@ func getPRNum(pr *github.PullRequest) (int, error) {
 	return num, nil
 }
 
-func getPRName(pr *github.PullRequest) (string, error) {
+// GetPRName retrieves the PR title from the GitHub API returned PR object
+// and returns it as a string
+func GetPRName(pr *github.PullRequest) (string, error) {
 	prNameMarshalled, err := json.Marshal(pr.Title)
 	if err != nil {
 		return "", err
@@ -301,11 +326,15 @@ func getPRName(pr *github.PullRequest) (string, error) {
 	return name, nil
 }
 
-func convertPRNumToString(prNum int) string {
+// ConvertPRNumToString converts the PR number to a string
+// for easier handling
+func ConvertPRNumToString(prNum int) string {
 	return strconv.Itoa(prNum)
 }
 
-func contains(s []string, e string) bool {
+// Contains accepts an array of strings and checks if the passed
+// string is contained with that array (this is for the merge commits)
+func Contains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
 			return true
