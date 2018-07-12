@@ -1,0 +1,159 @@
+<!DOCTYPE>
+<html>
+    <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <title>Release Notes Template</title>
+      <style type="text/css">
+
+        .main-header-image {
+          outline: none; 
+          text-decoration: none; 
+          -ms-interpolation-mode: bicubic; 
+          display: block; 
+          padding-top: 25px;
+        }
+
+        .main-header {
+          mso-line-height-rule: exactly; 
+          text-align:left;
+          font-family:Arial, sans-serif;
+          font-weight:normal;
+        }
+
+        .main-header.title {
+          font-size:24px;
+          line-height:30px;
+          font-weight:bold;
+          color:#46494B
+        }
+
+        .main-header.date {
+          font-size:12px;
+          line-height:18px;
+          color:#A3A4A5
+        }
+
+        .main-header.description {
+          font-size:16px;
+          line-height:24px;
+          color:#46494B
+        }
+
+        .main-body {
+          width:540px;
+          margin:0 auto
+        }
+
+        .section-headings {
+          border-radius: 2px; 
+          padding: 2px 8px; 
+          text-decoration: none; 
+          text-align: left; 
+          color: #FFFFFF;
+          font-family: Arial, sans-serif; 
+          font-size: 12px; 
+          line-height: 18px; 
+          font-weight: normal;
+          margin-top:6%;
+          margin-right:auto;
+        }
+
+        .section-headings.new {
+          background:#FF9900; 
+          border: 1px solid #FF9900;
+          width: 5%;
+        }
+
+        .section-headings.improvements {
+          background:#00A7F7; 
+          border: 1px solid #00A7F7;
+          width: 18%;
+        }
+
+        .section-headings.fixes {
+          background:#47B04B; 
+          border: 1px solid #47B04B;
+         width: 6.5%;
+        }
+
+        .section-content {
+          mso-line-height-rule: exactly; 
+          text-align:left;
+          font-family:Arial, sans-serif;
+          font-size:15px;
+          line-height:32px;
+          font-weight:normal;
+          color:#46494B;
+          margin-top:-1%;
+        }
+
+        .section-content.issue-text {
+          color: #0088C9; 
+          text-decoration: none;
+        }
+
+        img {
+          padding-right: 100%; 
+          float:none;
+        }
+      </style>
+    </head>
+  <body>
+    <div class="main-body" align="center">
+      <div>
+        <img src="./assets/img/ch_logo.jpg" class="main-header-image" width="200" height="135">
+      </div>
+      <div>
+        <p class="main-header title">Latest Releases and Bugfixes</p>
+        <p class="main-header date">June 20, 2018</p>
+        <p class="main-header description">Small description of release changes.</p>
+      </div>
+
+      <!-- Checks if there are any PR's in the NewFeature element, if not, don't output the New section -->
+      {{- if .NewFeature.PRs -}}
+      <div>
+        <p class="section-headings new">NEW</p>
+        <p class="section-content">
+          {{- range .NewFeature.PRs -}}
+          <a class="section-content issue-text" href="{{ .URL }}">#{{ .Number }}</a>   {{ .Name }}  <br>
+          {{- end -}}
+        </p>
+      </div>
+      {{- end -}}
+
+      <!-- Checks if there are any PR's in the Improvement element, if not, don't output the Improvements section -->
+      {{- if .Improvement.PRs -}}
+      <div>
+        <p class="section-headings improvements">IMPROVEMENTS</p>
+        <p class="section-content">
+          {{- range .Improvement.PRs -}}
+          <a class="section-content issue-text" href="{{ .URL }}">#{{ .Number }}</a>   {{ .Name }}  <br>
+          {{- end -}}
+        </p>
+      </div>
+      {{- end -}}
+
+      <!-- Checks if there are any PR's in the BugFix element, if not, don't output the BugFix section -->
+      {{- if .BugFix.PRs -}}
+      <div>
+        <p class="section-headings fixes">FIXES</p>
+        <p class="section-content">
+          {{- range .BugFix.PRs -}}
+          <a class="section-content issue-text" href="{{ .URL }}">#{{ .Number }}</a>   {{ .Name }}  <br>
+          {{- end -}}
+        </p>
+      </div>
+      {{- end -}}
+
+      <div>
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="min-width:100%" role="presentation">
+          <tbody>
+            <tr>
+              <th valign="top" style="text-align:left;font-size:1px;line-height:1px" bgcolor="#E8E8E8" height="1">&nbsp;</th>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>
