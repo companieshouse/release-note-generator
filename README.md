@@ -28,8 +28,7 @@ As described in the introduction, this tool generates a release note in the form
 ### Walkthrough
 The standard process of the tools is as follows:
 1) Establishes the web-server to listen and serve to `localhost:8080`
-2) Runs the `ServeTemplate` method that kicks off the `pre` functionality that populates the template that the server serves to the user
-3) The `pre` functionality is the creation of a release note during its pre-release stage - this details changes that are going into the next release.
+2) Runs the `ServeTemplate` method that kicks off the `pre` functionality that populates the template that the server serves to the user (the `pre` functionality is the creation of a release note during its pre-release stage - this details changes that are about to go into the next release. There can be a post if required but that will generate backdated release notes, but that come as an improvement in future - if needed)
 4) GitHub client is created to access the GitHub APIs
 5) Retrieve all merge commits SHA that are on the current checked out branch (will be the release branch) that aren't in `master`.
 6) Retrieves all PRs in the repository using GitHub API
