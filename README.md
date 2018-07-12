@@ -1,7 +1,7 @@
 # release-note-generator
 
 ## Introduction
-This is a tool that generates a release note web page based from the history of a release branch
+This is a tool that generates a release note web page based from the history of a release branch using Golang, Git and GitHub API
 
 ## Prerequisites
 To use this tool you will need to:
